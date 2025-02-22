@@ -3,6 +3,7 @@ package com.enote.enote.serviceImpl;
 import com.enote.enote.dto.CategoryDto;
 import com.enote.enote.dto.CategoryResponse;
 import com.enote.enote.entity.Category;
+import com.enote.enote.exception.ResourceNotFoundException;
 import com.enote.enote.repository.CategoryRepository;
 import com.enote.enote.service.CategoryService;
 import org.modelmapper.ModelMapper;
@@ -66,9 +67,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto getCategoryById(Integer id) {
-        Optional<Category> category = categoryRepository.findByIdAndIsDeletedFalse(id);
-        return category.map(value -> mapper.map(value, CategoryDto.class)).orElse(null);
+    public CategoryDto getCategoryById(Integer id) throws Exception {
+        Category category = categoryRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+                () -> new ResourceNotFoundException("Category not found with id: " + id)
+        );
+        return mapper.map(category, CategoryDto.class);
     }
 
     @Override
