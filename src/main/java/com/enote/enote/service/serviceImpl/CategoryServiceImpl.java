@@ -1,4 +1,4 @@
-package com.enote.enote.serviceImpl;
+package com.enote.enote.service.serviceImpl;
 
 import com.enote.enote.dto.CategoryDto;
 import com.enote.enote.dto.CategoryResponse;
@@ -6,6 +6,7 @@ import com.enote.enote.entity.Category;
 import com.enote.enote.exception.ResourceNotFoundException;
 import com.enote.enote.repository.CategoryRepository;
 import com.enote.enote.service.CategoryService;
+import com.enote.enote.util.Validation;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,26 +21,23 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryRepository categoryRepository;
     @Autowired
     private ModelMapper mapper;
+    @Autowired
+    private Validation validation;
 
     @Override
     public Boolean saveCategory(CategoryDto categoryDto) {
         Category category = mapper.map(categoryDto, Category.class);
-
+        validation.categoryValidation(categoryDto);
         if(ObjectUtils.isEmpty(categoryDto.getId())){
             category.setIsDeleted(false);
             category.setCreatedBy(1);
             category.setCreatedOn(new Date());
         }
-        else
-        {
+        else {
             updateCategory(category);
         }
-
         Category saveCategory = categoryRepository.save(category);
-        if (ObjectUtils.isEmpty(saveCategory)){
-            return false;
-        }
-        return true;
+        return !ObjectUtils.isEmpty(saveCategory);
     }
 
     private void updateCategory(Category category) {
