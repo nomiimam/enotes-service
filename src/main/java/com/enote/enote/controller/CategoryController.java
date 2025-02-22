@@ -2,6 +2,7 @@ package com.enote.enote.controller;
 
 import com.enote.enote.dto.CategoryDto;
 import com.enote.enote.dto.CategoryResponse;
+import com.enote.enote.exception.ResourceNotFoundException;
 import com.enote.enote.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -51,11 +52,14 @@ public class CategoryController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getCategoryById(@PathVariable("id") Integer id) {
-        CategoryDto categoryDto = categoryService.getCategoryById(id);
-        if (ObjectUtils.isEmpty(categoryDto)) {
-            return new ResponseEntity<>("Category not found with id: "+id, HttpStatus.NOT_FOUND);
+        try {
+            CategoryDto result = categoryService.getCategoryById(id);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(categoryDto, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
