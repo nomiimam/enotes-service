@@ -3,6 +3,7 @@ package com.enote.enote.service.serviceImpl;
 import com.enote.enote.dto.CategoryDto;
 import com.enote.enote.dto.CategoryResponse;
 import com.enote.enote.entity.Category;
+import com.enote.enote.exception.ExistDataException;
 import com.enote.enote.exception.ResourceNotFoundException;
 import com.enote.enote.repository.CategoryRepository;
 import com.enote.enote.service.CategoryService;
@@ -26,8 +27,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Boolean saveCategory(CategoryDto categoryDto) {
-        Category category = mapper.map(categoryDto, Category.class);
+
         validation.categoryValidation(categoryDto);
+        Category category = mapper.map(categoryDto, Category.class);
+        Boolean existCategory = categoryRepository.existsByName(category.getName().trim());
+        if (existCategory) {
+            throw new ExistDataException("Category already exist");
+        }
         if(ObjectUtils.isEmpty(categoryDto.getId())){
             category.setIsDeleted(false);
            // category.setCreatedBy(1);
